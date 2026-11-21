@@ -7,7 +7,7 @@ sealed class FalloRemoto(mensaje: String) : RuntimeException(mensaje) {
     class NoEncontrado : FalloRemoto("No encontramos lo que buscabas. Revisa el código.")
     class Rechazado(mensaje: String?) : FalloRemoto(mensaje ?: "El servidor rechazó la operación.")
     class Caido : FalloRemoto("Smart Bite no está disponible en este momento.")
-    class TiempoAgotado : FalloRemoto("El servidor tardó demasiado en responder.")
-    class SinConexion : FalloRemoto("No hay conexión con Smart Bite. Revisa la red y la dirección del servidor.")
+    class TiempoAgotado : FalloRemoto("El servidor tardó en responder; puede estar despertando. Intenta otra vez en unos segundos.")
+    class SinConexion : FalloRemoto("No hay conexión con Smart Bite. Revisa tu internet.")
     class RespuestaInvalida : FalloRemoto("El servidor respondió algo que la app no entiende.")
 }

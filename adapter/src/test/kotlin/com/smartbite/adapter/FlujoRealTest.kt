@@ -6,6 +6,7 @@ import com.smartbite.application.servicio.SmartBiteServicio
 import com.smartbite.domain.error.ReglaInvalida
 import com.smartbite.domain.modelo.Carrito
 import com.smartbite.domain.modelo.EstadoOrden
+import com.smartbite.domain.modelo.ResultadoCobro
 import com.smartbite.domain.modelo.Sesion
 import com.smartbite.domain.modelo.TipoConsumo
 import com.smartbite.domain.puerto.salida.SesionStore
@@ -63,15 +64,28 @@ class FlujoRealTest {
         mesero.pedirCuenta(enMesa.id, EstadoOrden.LISTA)
 
         val caja = servicio(direccion)
-        caja.iniciarSesion("caja@movil.co", "Demo12345")
-        val cuenta = caja.verPorCobrar().first { it.id == enMesa.id }
-        assertTrue(!cuenta.pagada)
+        caja.iniciarSesion(System.getProperty("api.caja").orEmpty().ifBlank { "caja@movil.co" }, "Demo12345")
+        val porCobrar = caja.verPorCobrar().first { it.id == enMesa.id }
         try {
-            caja.entregar(cuenta)
+            caja.entregar(porCobrar)
             throw AssertionError("No debía entregarse sin pagar")
         } catch (esperado: ReglaInvalida) {
             assertTrue(true)
         }
+        val cuenta = caja.verCuenta(enMesa.id)
+        assertEquals(carrito.total, cuenta.saldoPendiente)
+        val efectivo = caja.metodosDePago().first { !it.usaPasarela }
+        val primer = caja.cobrar(cuenta, efectivo, "10000", "", "", "")
+        assertTrue(!primer.cuenta.saldada)
+        val total = primer.cuenta.saldoDisponible.valor.toPlainString()
+        val pagado = caja.cobrar(primer.cuenta, efectivo, total, "2000", "200000", "app") as ResultadoCobro.Registrado
+        assertTrue(pagado.cuenta.saldada)
+        assertEquals(EstadoOrden.ENTREGADA, pagado.cuenta.orden.estado)
+        assertTrue(pagado.cambio!!.positivo)
+        val factura = caja.verFactura(pagado.cuenta.facturaId!!)
+        assertEquals(carrito.total, factura.consumo)
+        assertTrue(caja.verFacturas().any { it.id == factura.resumen.id })
+        assertTrue(cliente.buscarMesa("$direccion/cliente/mesa/$mesaQr/").disponible)
         caja.cerrarSesion()
     }
 }

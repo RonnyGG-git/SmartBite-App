@@ -112,7 +112,7 @@ class SmartBiteHttpTest {
     fun `un 400 trae el mensaje de la regla que rompio`() = runTest {
         servidor.enqueue(MockResponse().setResponseCode(400).setBody("""{"detail":"Esta mesa ya tiene un pedido en curso.","code":"mesa_ocupada"}"""))
         try {
-            http.abrirOrden(1)
+            http.abrirOrden(1, "", "")
             fail("Debió fallar")
         } catch (fallo: FalloRemoto.Rechazado) {
             assertEquals("Esta mesa ya tiene un pedido en curso.", fallo.message)

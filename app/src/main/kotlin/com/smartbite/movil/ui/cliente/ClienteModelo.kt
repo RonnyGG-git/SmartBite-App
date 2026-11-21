@@ -40,6 +40,11 @@ class ClienteModelo(private val cliente: ClienteCasos) : ModeloBase() {
     private var codigoPedido: String? = null
     private var seguimiento: Job? = null
 
+    fun leerQr(texto: String) {
+        codigoQr = texto
+        buscarMesa()
+    }
+
     fun buscarMesa() = trabajar {
         val encontrada = cliente.buscarMesa(codigoQr)
         menu = cliente.verMenu(encontrada.sucursalId)

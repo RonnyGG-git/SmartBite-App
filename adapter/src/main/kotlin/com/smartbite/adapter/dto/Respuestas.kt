@@ -45,8 +45,77 @@ data class OrdenDto(
     val tiempoEstimadoMin: Int?,
     val detalles: List<DetalleDto>?,
     val faltantes: List<String>?,
+    val tipoConsumo: String?,
+    val cuentaSolicitadaEn: String?,
 )
 
 data class PedidoCreadoDto(val codigo: String?, val orden: OrdenDto?)
+
+data class ReservaDto(
+    val id: Int?,
+    val codigo: String?,
+    val mesa: MesaResumenDto?,
+    val fechaHora: String?,
+    val numPersonas: Int?,
+    val nombre: String?,
+    val telefono: String?,
+)
+
+data class Pagina<T>(val count: Int?, val results: List<T>?)
+
+data class MetodoPagoDto(val id: Int?, val nombre: String?, val usaPasarela: Boolean?)
+
+data class PagoDto(
+    val id: Int?,
+    val metodo: String?,
+    val monto: String?,
+    val propina: String?,
+    val estado: String?,
+    val estadoNombre: String?,
+)
+
+data class CuentaDto(
+    val orden: OrdenDto?,
+    val saldoPendiente: String?,
+    val saldoDisponible: String?,
+    val cobrable: Boolean?,
+    val pagos: List<PagoDto>?,
+    val factura: Int?,
+    val checkout: String?,
+    val cambio: String?,
+)
+
+data class QrDto(val url: String?, val qrPngBase64: String?, val saldoPendiente: String?)
+
+data class FacturaResumenDto(
+    val id: Int?,
+    val codigo: String?,
+    val orden: Int?,
+    val clienteNombre: String?,
+    val totalPagado: String?,
+    val creadoEn: String?,
+)
+
+data class EmisorDto(val nombre: String?, val nit: String?)
+
+data class LineaFacturaDto(val nombre: String?, val cantidad: Int?, val precioUnitario: String?, val subtotal: String?)
+
+data class DetalleFacturaDto(val emisor: EmisorDto?, val lineas: List<LineaFacturaDto>?)
+
+data class FacturaDto(
+    val id: Int?,
+    val codigo: String?,
+    val orden: Int?,
+    val clienteNombre: String?,
+    val totalPagado: String?,
+    val creadoEn: String?,
+    val clienteDocumento: String?,
+    val baseGravable: String?,
+    val inc: String?,
+    val totalConsumo: String?,
+    val propina: String?,
+    val cufe: String?,
+    val detalle: DetalleFacturaDto?,
+)
 
 data class ErrorDto(val detail: String?, val code: String?)

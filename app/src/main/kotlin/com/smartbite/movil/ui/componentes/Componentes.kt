@@ -2,28 +2,37 @@ package com.smartbite.movil.ui.componentes
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.smartbite.domain.modelo.EstadoOrden
 import com.smartbite.domain.modelo.Orden
 import com.smartbite.movil.ui.pesos
+import com.smartbite.movil.ui.tema.Brasa
 import com.smartbite.movil.ui.tema.colorDe
 
 @Composable
@@ -60,6 +69,44 @@ private fun Franja(texto: String, color: Color) {
 }
 
 @Composable
+fun FotoPlatillo(url: String?, nombre: String, lado: Dp = 64.dp) {
+    val forma = RoundedCornerShape(12.dp)
+    if (url == null) {
+        Box(
+            modifier = Modifier.size(lado).clip(forma).background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(nombre.take(1).uppercase(), color = Brasa, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+        }
+    } else {
+        AsyncImage(
+            model = url,
+            contentDescription = nombre,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.size(lado).clip(forma).background(MaterialTheme.colorScheme.surfaceVariant),
+        )
+    }
+}
+
+@Composable
+fun <T> Pestanas(opciones: List<T>, elegida: T, titulo: (T) -> String, alElegir: (T) -> Unit) {
+    TabRow(selectedTabIndex = opciones.indexOf(elegida).coerceAtLeast(0)) {
+        opciones.forEach { opcion ->
+            Tab(selected = opcion == elegida, onClick = { alElegir(opcion) }, text = { Text(titulo(opcion), maxLines = 1) })
+        }
+    }
+}
+
+@Composable
+fun Vacio(texto: String) {
+    Text(
+        texto,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
+    )
+}
+
+@Composable
 fun TarjetaOrden(orden: Orden, acciones: @Composable () -> Unit = {}) {
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -69,7 +116,7 @@ fun TarjetaOrden(orden: Orden, acciones: @Composable () -> Unit = {}) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Orden #${orden.id}" + (orden.mesa?.let { " · Mesa $it" } ?: " · Sin mesa"),
+                    text = "Orden #${orden.id}" + (orden.mesa?.let { " · Mesa $it" } ?: if (orden.paraLlevar) " · Para llevar" else " · Sin mesa"),
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f),
                 )
@@ -88,7 +135,14 @@ fun TarjetaOrden(orden: Orden, acciones: @Composable () -> Unit = {}) {
             orden.minutosEstimados?.let { Text("Tiempo estimado: $it min", color = MaterialTheme.colorScheme.onSurfaceVariant) }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Total ${orden.total.pesos()}", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                Text(if (orden.pagada) "Pagada" else "Sin pagar", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    when {
+                        orden.pagada -> "Pagada"
+                        orden.cuentaSolicitada -> "Cuenta pedida"
+                        else -> "Sin pagar"
+                    },
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
             acciones()
         }

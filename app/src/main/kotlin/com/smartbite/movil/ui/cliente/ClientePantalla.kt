@@ -4,9 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,13 +28,16 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import com.smartbite.domain.modelo.Producto
 import com.smartbite.domain.modelo.TipoConsumo
 import com.smartbite.movil.ui.casos
+import com.smartbite.movil.ui.componentes.FotoPlatillo
 import com.smartbite.movil.ui.componentes.Mensajes
 import com.smartbite.movil.ui.componentes.TarjetaOrden
 import com.smartbite.movil.ui.pesos
@@ -71,8 +76,20 @@ fun ClientePantalla(alVolver: () -> Unit) {
 
 @Composable
 private fun BuscarMesa(modelo: ClienteModelo) {
+    val contexto = LocalContext.current
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Escribe el código del QR de tu mesa o pega el enlace que abriste con la cámara.")
+        Text("Escanea el código QR que está en tu mesa.", style = MaterialTheme.typography.titleMedium)
+        Button(
+            onClick = {
+                GmsBarcodeScanning.getClient(contexto).startScan()
+                    .addOnSuccessListener { leido -> leido.rawValue?.let(modelo::leerQr) }
+            },
+            enabled = !modelo.ocupado,
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+        ) {
+            Text(if (modelo.ocupado) "Buscando tu mesa…" else "Escanear QR de la mesa")
+        }
+        Text("¿No funciona la cámara? Escribe el código o pega el enlace del QR.", color = MaterialTheme.colorScheme.onSurfaceVariant)
         OutlinedTextField(
             value = modelo.codigoQr,
             onValueChange = { modelo.codigoQr = it },
@@ -81,12 +98,8 @@ private fun BuscarMesa(modelo: ClienteModelo) {
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
             modifier = Modifier.fillMaxWidth(),
         )
-        Button(
-            onClick = modelo::buscarMesa,
-            enabled = !modelo.ocupado,
-            modifier = Modifier.fillMaxWidth().height(52.dp),
-        ) {
-            Text(if (modelo.ocupado) "Buscando…" else "Ver el menú")
+        OutlinedButton(onClick = modelo::buscarMesa, enabled = !modelo.ocupado, modifier = Modifier.fillMaxWidth()) {
+            Text("Ver el menú")
         }
     }
 }
@@ -97,11 +110,15 @@ private fun FilaMenu(modelo: ClienteModelo, producto: Producto) {
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
-        Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            FotoPlatillo(producto.imagen, producto.nombre, 76.dp)
+            Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text(producto.nombre, fontWeight = FontWeight.SemiBold)
-                Text(producto.categoria, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(producto.precio.pesos(), color = MaterialTheme.colorScheme.primary)
+                if (producto.descripcion.isNotBlank()) {
+                    Text(producto.descripcion, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
+                }
+                Text(producto.precio.pesos(), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
             }
             val cantidad = modelo.carrito.cantidadDe(producto.id)
             if (cantidad > 0) {

@@ -34,14 +34,16 @@ private val formatoPesos = NumberFormat.getCurrencyInstance(Locale.forLanguageTa
 
 fun Dinero.pesos(): String = formatoPesos.format(valor)
 
+fun Dinero.paraEditar(): String = valor.stripTrailingZeros().toPlainString()
+
 abstract class ModeloBase : ViewModel() {
 
     var ocupado by mutableStateOf(false)
         private set
     var error by mutableStateOf<String?>(null)
-        private set
+        protected set
     var aviso by mutableStateOf<String?>(null)
-        private set
+        protected set
 
     protected fun trabajar(exito: String? = null, bloque: suspend () -> Unit) {
         if (ocupado) return
@@ -51,7 +53,7 @@ abstract class ModeloBase : ViewModel() {
         viewModelScope.launch {
             try {
                 bloque()
-                aviso = exito
+                if (exito != null) aviso = exito
             } catch (cancelado: CancellationException) {
                 throw cancelado
             } catch (fallo: Exception) {

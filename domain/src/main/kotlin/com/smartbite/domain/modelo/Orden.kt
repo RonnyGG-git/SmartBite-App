@@ -14,7 +14,11 @@ data class Orden(
     val minutosEstimados: Int?,
     val lineas: List<LineaOrden>,
     val faltantes: List<String> = emptyList(),
+    val cuentaSolicitada: Boolean = false,
+    val paraLlevar: Boolean = false,
 ) {
     val esperaConfirmacion: Boolean get() = estado == EstadoOrden.POR_CONFIRMAR
     val puedeEntregarse: Boolean get() = estado == EstadoOrden.LISTA && pagada
+    val sinMesa: Boolean get() = mesa == null
+    val cancelablePorMesero: Boolean get() = estado == EstadoOrden.PENDIENTE
 }
