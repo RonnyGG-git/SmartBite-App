@@ -3,7 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-val apiBaseUrl: String = providers.gradleProperty("apiBaseUrl").getOrElse("http://10.0.2.2:8000/")
+val apiBaseUrl: String = providers.gradleProperty("apiBaseUrl").getOrElse("https://smartbite-7z8m.onrender.com/")
 
 android {
     namespace = "com.smartbite.movil"

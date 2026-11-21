@@ -9,11 +9,14 @@ caja entrega cuando la orden está pagada (el cobro se registra en la web).
 
 ## Ejecutar
 
-1. Backend en la rama `feature/api-confirmar-pedido` del repo `smartbite`, con una base SQLite de demo
-   (ver `demo-backend/cargar_demo_movil.py`) y `runserver 0.0.0.0:8000`.
-2. Abrir esta carpeta en Android Studio y ejecutar `app`. La API por defecto es `http://10.0.2.2:8000/`
-   (`apiBaseUrl` en `gradle.properties`).
-3. Empleados de la demo: `admin@movil.co`, `mesero@movil.co`, `cocina@movil.co`, `caja@movil.co` — clave `Demo12345`.
+La app usa la API de producción en Render (`https://smartbite-7z8m.onrender.com/`, base de datos en Neon).
+No hay que levantar nada: abrir la carpeta en Android Studio y ejecutar `app`.
+
+- Empleados de La Brasa Criolla: `carlos@labrasa.co` (mesero), `jorge@labrasa.co` (cocina),
+  `diana@labrasa.co` (caja), `admin@labrasa.co` (todo). La clave la tiene el equipo.
+- El plan gratuito de Render se duerme: la primera petición puede tardar hasta un minuto.
+- Para probar contra un Django local: `./gradlew :app:assembleDebug -PapiBaseUrl=http://10.0.2.2:8000/`
+  (datos de ejemplo en `demo-backend/cargar_demo_movil.py`).
 
 ## Pruebas
 
