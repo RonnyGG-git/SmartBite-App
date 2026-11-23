@@ -31,6 +31,7 @@ import com.smartbite.domain.modelo.PagoRegistrado
 import com.smartbite.domain.modelo.PedidoCreado
 import com.smartbite.domain.modelo.Producto
 import com.smartbite.domain.modelo.Reserva
+import com.smartbite.domain.modelo.RestauranteRef
 import com.smartbite.domain.modelo.Rol
 import com.smartbite.domain.modelo.Sesion
 import com.smartbite.domain.valor.Dinero
@@ -54,6 +55,8 @@ fun SesionDto.aDominio(): Sesion {
         nombre = perfil.nombre.orEmpty(),
         rol = Rol.de(perfil.rol),
         restaurante = perfil.restauranteActual?.nombre,
+        restaurantes = perfil.restaurantes.orEmpty().mapNotNull { r -> r.id?.let { RestauranteRef(it, r.nombre.orEmpty()) } },
+        restauranteId = perfil.restauranteActual?.id,
     )
 }
 

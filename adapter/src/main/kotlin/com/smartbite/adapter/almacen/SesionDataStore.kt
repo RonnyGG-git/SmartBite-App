@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.google.gson.Gson
+import com.smartbite.domain.modelo.RestauranteRef
 import com.smartbite.domain.modelo.Rol
 import com.smartbite.domain.modelo.Sesion
 import com.smartbite.domain.puerto.salida.SesionStore
@@ -15,7 +16,16 @@ class SesionDataStore(
     private val gson: Gson = Gson(),
 ) : SesionStore {
 
-    private data class Guardada(val token: String?, val nombre: String?, val rol: String?, val restaurante: String?)
+    private data class Ref(val id: Int?, val nombre: String?)
+
+    private data class Guardada(
+        val token: String?,
+        val nombre: String?,
+        val rol: String?,
+        val restaurante: String?,
+        val restaurantes: List<Ref>?,
+        val restauranteId: Int?,
+    )
 
     override suspend fun leer(): Sesion? {
         val texto = datos.data.first()[CLAVE] ?: return null
@@ -29,11 +39,23 @@ class SesionDataStore(
             borrar()
             return null
         }
-        return Sesion(guardada.token, guardada.nombre.orEmpty(), rol, guardada.restaurante)
+        return Sesion(
+            token = guardada.token,
+            nombre = guardada.nombre.orEmpty(),
+            rol = rol,
+            restaurante = guardada.restaurante,
+            restaurantes = guardada.restaurantes.orEmpty().mapNotNull { r -> r.id?.let { RestauranteRef(it, r.nombre.orEmpty()) } },
+            restauranteId = guardada.restauranteId,
+        )
     }
 
     override suspend fun guardar(sesion: Sesion) {
-        val texto = gson.toJson(Guardada(sesion.token, sesion.nombre, sesion.rol.name, sesion.restaurante))
+        val texto = gson.toJson(
+            Guardada(
+                sesion.token, sesion.nombre, sesion.rol.name, sesion.restaurante,
+                sesion.restaurantes.map { Ref(it.id, it.nombre) }, sesion.restauranteId,
+            ),
+        )
         datos.edit { it[CLAVE] = texto }
     }
 

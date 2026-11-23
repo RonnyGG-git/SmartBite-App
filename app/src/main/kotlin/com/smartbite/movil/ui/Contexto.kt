@@ -8,8 +8,10 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.smartbite.application.puerto.entrada.CasosDeUso
+import com.smartbite.domain.error.CamposInvalidos
 import com.smartbite.domain.error.FalloRemoto
 import com.smartbite.domain.error.ReglaInvalida
+import com.smartbite.domain.error.SinDisponibilidad
 import com.smartbite.domain.valor.Dinero
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -24,7 +26,7 @@ val LocalCasos = staticCompositionLocalOf<CasosDeUso> {
 fun casos(): CasosDeUso = LocalCasos.current
 
 fun mensajeDe(fallo: Throwable): String = when (fallo) {
-    is ReglaInvalida, is FalloRemoto -> fallo.message ?: "No se pudo completar la acción."
+    is ReglaInvalida, is FalloRemoto, is CamposInvalidos, is SinDisponibilidad -> fallo.message ?: "No se pudo completar la acción."
     else -> "Ocurrió un error inesperado."
 }
 
@@ -36,6 +38,8 @@ fun Dinero.pesos(): String = formatoPesos.format(valor)
 
 fun Dinero.paraEditar(): String = valor.stripTrailingZeros().toPlainString()
 
+fun pesosDeTexto(texto: String): String = runCatching { Dinero.de(texto).pesos() }.getOrDefault(texto)
+
 abstract class ModeloBase : ViewModel() {
 
     var ocupado by mutableStateOf(false)
@@ -44,23 +48,35 @@ abstract class ModeloBase : ViewModel() {
         protected set
     var aviso by mutableStateOf<String?>(null)
         protected set
+    var campos by mutableStateOf<Map<String, String>>(emptyMap())
+        private set
 
     protected fun trabajar(exito: String? = null, bloque: suspend () -> Unit) {
         if (ocupado) return
         ocupado = true
         error = null
         aviso = null
+        campos = emptyMap()
         viewModelScope.launch {
             try {
                 bloque()
                 if (exito != null) aviso = exito
             } catch (cancelado: CancellationException) {
                 throw cancelado
+            } catch (invalido: CamposInvalidos) {
+                campos = invalido.errores
+                error = invalido.errores["general"] ?: "Revisa los campos marcados."
             } catch (fallo: Exception) {
                 error = mensajeDe(fallo)
             } finally {
                 ocupado = false
             }
         }
+    }
+
+    fun limpiarMensajes() {
+        error = null
+        aviso = null
+        campos = emptyMap()
     }
 }

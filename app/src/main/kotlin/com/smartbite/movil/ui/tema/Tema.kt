@@ -1,6 +1,7 @@
 package com.smartbite.movil.ui.tema
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -26,7 +27,11 @@ private val colores = darkColorScheme(
 
 @Composable
 fun TemaSmartBite(contenido: @Composable () -> Unit) {
-    MaterialTheme(colorScheme = colores, content = contenido)
+    MaterialTheme(colorScheme = colores) {
+        Surface(color = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onBackground) {
+            contenido()
+        }
+    }
 }
 
 fun colorDe(estado: EstadoOrden): Color = when (estado) {

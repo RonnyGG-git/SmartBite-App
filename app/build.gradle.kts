@@ -1,9 +1,16 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
 val apiBaseUrl: String = providers.gradleProperty("apiBaseUrl").getOrElse("https://smartbite-7z8m.onrender.com/")
+
+val firma = Properties().apply {
+    val archivo = rootProject.file("keystore.properties")
+    if (archivo.exists()) archivo.inputStream().use { load(it) }
+}
 
 android {
     namespace = "com.smartbite.movil"
@@ -13,9 +20,20 @@ android {
         applicationId = "com.smartbite.movil"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "0.2"
+        versionCode = 3
+        versionName = "1.0"
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
+    }
+
+    signingConfigs {
+        if (firma.isNotEmpty()) {
+            create("release") {
+                storeFile = rootProject.file(firma.getProperty("storeFile"))
+                storePassword = firma.getProperty("storePassword")
+                keyAlias = firma.getProperty("keyAlias")
+                keyPassword = firma.getProperty("keyPassword")
+            }
+        }
     }
 
     buildTypes {
@@ -25,6 +43,7 @@ android {
         release {
             isMinifyEnabled = false
             manifestPlaceholders["texto_plano"] = "false"
+            if (firma.isNotEmpty()) signingConfig = signingConfigs.getByName("release")
         }
     }
 

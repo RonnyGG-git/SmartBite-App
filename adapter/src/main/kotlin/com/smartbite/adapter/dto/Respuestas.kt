@@ -2,7 +2,12 @@ package com.smartbite.adapter.dto
 
 data class SesionDto(val token: String?, val usuario: PerfilDto?)
 
-data class PerfilDto(val nombre: String?, val rol: String?, val restauranteActual: NombreDto?)
+data class PerfilDto(
+    val nombre: String?,
+    val rol: String?,
+    val restauranteActual: NombreDto?,
+    val restaurantes: List<NombreDto>?,
+)
 
 data class NombreDto(val id: Int?, val nombre: String?)
 
@@ -118,4 +123,9 @@ data class FacturaDto(
     val detalle: DetalleFacturaDto?,
 )
 
-data class ErrorDto(val detail: String?, val code: String?)
+data class ErrorDto(
+    val detail: String?,
+    val code: String?,
+    val errores: Map<String, Any?>?,
+    val alternativas: List<String>?,
+)

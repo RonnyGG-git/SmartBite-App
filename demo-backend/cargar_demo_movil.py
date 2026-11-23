@@ -37,5 +37,8 @@ for rol_nombre, correo in [
             rol=rol, restaurante=restaurante, email_verificado=True,
         )
 
+restaurante.administrador = Usuario.objects.get(email="admin@movil.co")
+restaurante.save(update_fields=["administrador"])
+
 print("mesas", list(Mesa.objects.filter(sucursal=sucursal).values_list("id", "numero")))
 print("sucursal", sucursal.pk)

@@ -15,8 +15,9 @@ object FabricaHttp {
         .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
         .create()
 
-    fun api(direccion: String): SmartBiteApi {
+    private fun retrofit(direccion: String, cabecera: CabeceraRestaurante): Retrofit {
         val cliente = OkHttpClient.Builder()
+            .addInterceptor(cabecera)
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
             .callTimeout(75, TimeUnit.SECONDS)
@@ -26,9 +27,17 @@ object FabricaHttp {
             .client(cliente)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
-            .create(SmartBiteApi::class.java)
     }
 
-    fun llamadas(sesiones: SesionStore, alVencerSesion: () -> Unit): LlamadaApi =
-        LlamadaApi(sesiones, gson, alVencerSesion)
+    fun api(direccion: String, cabecera: CabeceraRestaurante = CabeceraRestaurante()): SmartBiteApi =
+        retrofit(direccion, cabecera).create(SmartBiteApi::class.java)
+
+    fun extra(direccion: String, cabecera: CabeceraRestaurante = CabeceraRestaurante()): ApiExtra =
+        retrofit(direccion, cabecera).create(ApiExtra::class.java)
+
+    fun llamadas(
+        sesiones: SesionStore,
+        cabecera: CabeceraRestaurante = CabeceraRestaurante(),
+        alVencerSesion: () -> Unit,
+    ): LlamadaApi = LlamadaApi(sesiones, gson, cabecera, alVencerSesion)
 }

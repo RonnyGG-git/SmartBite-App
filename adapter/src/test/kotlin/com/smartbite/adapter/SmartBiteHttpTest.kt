@@ -1,7 +1,6 @@
 package com.smartbite.adapter
 
 import com.smartbite.adapter.http.FabricaHttp
-import com.smartbite.adapter.http.LlamadaApi
 import com.smartbite.adapter.http.SmartBiteHttp
 import com.smartbite.domain.error.FalloRemoto
 import com.smartbite.domain.modelo.Carrito
@@ -47,7 +46,7 @@ class SmartBiteHttpTest {
         servidor = MockWebServer().apply { start() }
         memoria = Memoria(Sesion("tok-1", "Ana", Rol.MESERO, "La Brasa"))
         avisos = 0
-        val llamar = LlamadaApi(memoria, FabricaHttp.gson) { avisos++ }
+        val llamar = FabricaHttp.llamadas(memoria) { avisos++ }
         http = SmartBiteHttp(FabricaHttp.api(servidor.url("/").toString()), llamar)
     }
 

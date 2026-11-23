@@ -76,4 +76,4 @@ interface CajaCasos {
     suspend fun verFactura(facturaId: Int): Factura
 }
 
-interface CasosDeUso : SesionCasos, ClienteCasos, MeseroCasos, CocinaCasos, CajaCasos
+interface OperacionCasos : SesionCasos, ClienteCasos, MeseroCasos, CocinaCasos, CajaCasos

@@ -3,7 +3,9 @@ package com.smartbite.adapter.http
 import com.google.gson.Gson
 import com.google.gson.JsonParseException
 import com.smartbite.adapter.dto.ErrorDto
+import com.smartbite.domain.error.CamposInvalidos
 import com.smartbite.domain.error.FalloRemoto
+import com.smartbite.domain.error.SinDisponibilidad
 import com.smartbite.domain.puerto.salida.SesionStore
 import kotlinx.coroutines.CancellationException
 import retrofit2.Response
@@ -13,6 +15,7 @@ import java.io.InterruptedIOException
 class LlamadaApi(
     private val sesiones: SesionStore,
     private val gson: Gson,
+    private val cabecera: CabeceraRestaurante,
     private val alVencerSesion: () -> Unit,
 ) {
 
@@ -23,6 +26,7 @@ class LlamadaApi(
             alVencerSesion()
             throw FalloRemoto.SesionVencida()
         }
+        cabecera.restauranteId = sesion.restauranteId
         return ejecutar(token = sesion.token) { llamada("Token ${sesion.token}") }
     }
 
@@ -52,18 +56,32 @@ class LlamadaApi(
         null
     }
 
-    private suspend fun fallo(codigo: Int, error: ErrorDto?, token: String?): FalloRemoto = when {
-        codigo == 401 && token != null -> {
-            if (sesiones.leer()?.token == token) {
-                sesiones.borrar()
-                alVencerSesion()
+    private fun primerMensaje(valor: Any?): String? = when (valor) {
+        is String -> valor
+        is List<*> -> valor.firstNotNullOfOrNull { primerMensaje(it) }
+        is Map<*, *> -> valor.values.firstNotNullOfOrNull { primerMensaje(it) }
+        else -> null
+    }
+
+    private suspend fun fallo(codigo: Int, error: ErrorDto?, token: String?): RuntimeException {
+        val campos = error?.errores?.mapNotNull { (clave, valor) ->
+            primerMensaje(valor)?.let { (if (clave == "non_field_errors" || clave == "__all__") "general" else clave) to it }
+        }?.toMap().orEmpty()
+        return when {
+            codigo == 401 && token != null -> {
+                if (sesiones.leer()?.token == token) {
+                    sesiones.borrar()
+                    alVencerSesion()
+                }
+                FalloRemoto.SesionVencida()
             }
-            FalloRemoto.SesionVencida()
+            codigo == 403 && error?.code == "correo_sin_verificar" -> FalloRemoto.CorreoSinVerificar()
+            codigo == 403 -> FalloRemoto.SinPermiso(error?.detail)
+            codigo == 404 -> FalloRemoto.NoEncontrado()
+            codigo >= 500 -> FalloRemoto.Caido()
+            campos.isNotEmpty() -> CamposInvalidos(campos)
+            !error?.alternativas.isNullOrEmpty() -> SinDisponibilidad(error?.detail ?: "No hay disponibilidad.", error!!.alternativas!!)
+            else -> FalloRemoto.Rechazado(error?.detail)
         }
-        codigo == 403 && error?.code == "correo_sin_verificar" -> FalloRemoto.CorreoSinVerificar()
-        codigo == 403 -> FalloRemoto.SinPermiso(error?.detail)
-        codigo == 404 -> FalloRemoto.NoEncontrado()
-        codigo >= 500 -> FalloRemoto.Caido()
-        else -> FalloRemoto.Rechazado(error?.detail)
     }
 }

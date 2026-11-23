@@ -1,26 +1,36 @@
-# Smart Bite — app Android hexagonal
+# Smart Bite — app Android
 
-Cliente, mesero, cocina y caja de Smart Bite en Kotlin + Jetpack Compose, con la arquitectura
-de puertos y adaptadores: `:domain` y `:application` (Kotlin puro), `:adapter` (Retrofit, DataStore)
-y `:app` (Compose, inyección manual en `Contenedor`).
+App de Smart Bite en Kotlin + Jetpack Compose con arquitectura de puertos y adaptadores:
+`:domain` y `:application` (Kotlin puro), `:adapter` (Retrofit, DataStore) y `:app` (Compose,
+inyección manual en `Contenedor`). Usa la misma API y la misma base (Render + Neon) que la web.
 
-Flujo: el cliente pide por el QR de la mesa → el mesero confirma → cocina prepara → el mesero pide la cuenta →
-caja entrega cuando la orden está pagada (el cobro se registra en la web).
+## Qué hace
+
+| Quién | Módulos |
+|---|---|
+| Cliente sin cuenta | Pedir en la mesa con el QR, restaurantes y menú con fotos, pedido para llevar, reservar, opinar, mis pedidos y reservas |
+| Cliente registrado | Lo mismo, con su cuenta |
+| Mesero | Mesas, confirmar pedidos por QR, abrir órdenes, cantidades, reservas, pedidos sin mesa, pedir cuenta, entregar |
+| Cocina | Comandas, tiempo estimado, lista; catálogo, categorías y recetas |
+| Caja | Por cobrar, cobro en efectivo, transferencia o pasarela, QR de pago, para llevar, facturas, ventas |
+| Inventario | Ítems y ajustes, movimientos, proveedores, compras (recibir y anular), recetas |
+| Administrador | Todo lo anterior, más el tablero, usuarios, mesas y su QR, sucursales, restaurantes y código de acceso, opiniones; cambiar de restaurante |
+
+El domiciliario sigue en la web.
 
 ## Ejecutar
 
-La app usa la API de producción en Render (`https://smartbite-7z8m.onrender.com/`, base de datos en Neon).
-No hay que levantar nada: abrir la carpeta en Android Studio y ejecutar `app`.
+Abrir en Android Studio y ejecutar `app`. Apunta a `https://smartbite-7z8m.onrender.com/`.
+Necesita que el backend tenga la rama `feature/api-app-completa` desplegada.
 
-- Empleados de La Brasa Criolla: `carlos@labrasa.co` (mesero), `jorge@labrasa.co` (cocina),
-  `diana@labrasa.co` (caja), `admin@labrasa.co` (todo). La clave la tiene el equipo.
-- El plan gratuito de Render se duerme: la primera petición puede tardar hasta un minuto.
-- Para probar contra un Django local: `./gradlew :app:assembleDebug -PapiBaseUrl=http://10.0.2.2:8000/`
-  (datos de ejemplo en `demo-backend/cargar_demo_movil.py`).
+Contra un Django local: `./gradlew :app:assembleDebug -PapiBaseUrl=http://10.0.2.2:8000/`
+(datos de ejemplo en `demo-backend/cargar_demo_movil.py`).
+
+APK firmado: `./gradlew :app:assembleRelease` (requiere `keystore.properties` y `firma/`, que no van al repo).
 
 ## Pruebas
 
 ```
 ./gradlew :domain:test :application:test :adapter:testDebugUnitTest :app:testDebugUnitTest
-./gradlew :adapter:testDebugUnitTest --tests "*FlujoRealTest*" -PapiTestUrl=http://localhost:8000 -PapiTestMesa=1
+./gradlew :adapter:testDebugUnitTest --tests "*RealTest*" -PapiTestUrl=http://localhost:8000 -PapiTestMesa=1
 ```

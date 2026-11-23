@@ -5,6 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.smartbite.application.puerto.entrada.ClienteCasos
+import com.smartbite.application.puerto.entrada.PublicoCasos
+import com.smartbite.domain.modelo.TipoOpinion
 import com.smartbite.domain.error.ReglaInvalida
 import com.smartbite.domain.modelo.Carrito
 import com.smartbite.domain.modelo.MesaQr
@@ -19,7 +21,7 @@ import kotlinx.coroutines.launch
 
 enum class Paso { MESA, MENU, SEGUIMIENTO }
 
-class ClienteModelo(private val cliente: ClienteCasos) : ModeloBase() {
+class ClienteModelo(private val cliente: ClienteCasos, private val publico: PublicoCasos) : ModeloBase() {
 
     var paso by mutableStateOf(Paso.MESA)
         private set
@@ -70,6 +72,7 @@ class ClienteModelo(private val cliente: ClienteCasos) : ModeloBase() {
         val actual = mesa ?: return@trabajar
         val pedido = cliente.pedir(actual, nombre, tipo, carrito)
         codigoPedido = pedido.codigo
+        publico.recordarPedido(pedido.codigo)
         orden = pedido.orden
         carrito = Carrito()
         paso = Paso.SEGUIMIENTO
@@ -94,6 +97,20 @@ class ClienteModelo(private val cliente: ClienteCasos) : ModeloBase() {
                 }
             }
         }
+    }
+
+    var opinando by mutableStateOf(false)
+        private set
+    var mensajeOpinion by mutableStateOf("")
+
+    fun abrirOpinion(si: Boolean) {
+        opinando = si
+    }
+
+    fun opinar() = trabajar("Gracias. El restaurante revisará tu mensaje.") {
+        publico.opinar(TipoOpinion.SUGERENCIA, mensajeOpinion, nombre, "", mesa?.id)
+        mensajeOpinion = ""
+        opinando = false
     }
 
     fun volverAMesa() {

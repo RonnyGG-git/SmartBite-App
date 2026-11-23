@@ -217,11 +217,11 @@ fun MeseroPantalla() {
                 when (modelo.pestana) {
                     PestanaMesero.MESAS -> items(modelo.mesas, key = { it.id }) { mesa -> TarjetaMesa(modelo, mesa) }
                     PestanaMesero.RESERVAS -> {
-                        if (modelo.reservas.isEmpty() && !modelo.ocupado) item { Vacio("No hay reservas próximas.") }
+                        if (modelo.reservas.isEmpty() && !modelo.ocupado && modelo.error == null) item { Vacio("No hay reservas próximas.") }
                         items(modelo.reservas, key = { it.id }) { reserva -> TarjetaReserva(modelo, reserva) }
                     }
                     PestanaMesero.SIN_MESA -> {
-                        if (modelo.sinMesa.isEmpty() && !modelo.ocupado) item { Vacio("No hay pedidos sin mesa activos.") }
+                        if (modelo.sinMesa.isEmpty() && !modelo.ocupado && modelo.error == null) item { Vacio("No hay pedidos sin mesa activos.") }
                         items(modelo.sinMesa, key = { it.id }) { orden ->
                             TarjetaOrden(orden) {
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

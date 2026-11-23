@@ -263,7 +263,7 @@ private fun LazyListScope.listas(modelo: CajaModelo) {
     }
     when (modelo.pestana) {
         PestanaCaja.COBRAR -> {
-            if (modelo.porCobrar.isEmpty() && !modelo.ocupado) item { Vacio("No hay cuentas pedidas por los meseros.") }
+            if (modelo.porCobrar.isEmpty() && !modelo.ocupado && modelo.error == null) item { Vacio("No hay cuentas pedidas por los meseros.") }
             items(modelo.porCobrar, key = { it.id }) { orden ->
                 TarjetaOrden(orden) {
                     Button(onClick = { modelo.abrirCobro(orden) }, enabled = !modelo.ocupado, modifier = Modifier.fillMaxWidth()) { Text("Cobrar") }
@@ -271,7 +271,7 @@ private fun LazyListScope.listas(modelo: CajaModelo) {
             }
         }
         PestanaCaja.LLEVAR -> {
-            if (modelo.paraLlevar.isEmpty() && !modelo.ocupado) item { Vacio("No hay pedidos para llevar activos.") }
+            if (modelo.paraLlevar.isEmpty() && !modelo.ocupado && modelo.error == null) item { Vacio("No hay pedidos para llevar activos.") }
             items(modelo.paraLlevar, key = { it.id }) { orden ->
                 TarjetaOrden(orden) {
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -290,7 +290,7 @@ private fun LazyListScope.listas(modelo: CajaModelo) {
             }
         }
         PestanaCaja.FACTURAS -> {
-            if (modelo.facturas.isEmpty() && !modelo.ocupado) item { Vacio("Todavía no hay facturas.") }
+            if (modelo.facturas.isEmpty() && !modelo.ocupado && modelo.error == null) item { Vacio("Todavía no hay facturas.") }
             items(modelo.facturas, key = { it.id }) { resumen ->
                 Card(
                     shape = RoundedCornerShape(14.dp),
@@ -309,7 +309,7 @@ private fun LazyListScope.listas(modelo: CajaModelo) {
             }
         }
         PestanaCaja.VENTAS -> {
-            if (modelo.ventas.isEmpty() && !modelo.ocupado) item { Vacio("Todavía no hay ventas.") }
+            if (modelo.ventas.isEmpty() && !modelo.ocupado && modelo.error == null) item { Vacio("Todavía no hay ventas.") }
             items(modelo.ventas, key = { it.id }) { orden -> TarjetaOrden(orden) }
         }
     }

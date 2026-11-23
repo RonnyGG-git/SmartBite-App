@@ -46,7 +46,7 @@ import com.smartbite.movil.ui.pesos
 @Composable
 fun ClientePantalla(alVolver: () -> Unit) {
     val app = casos()
-    val modelo: ClienteModelo = viewModel { ClienteModelo(app) }
+    val modelo: ClienteModelo = viewModel { ClienteModelo(app, app) }
 
     Scaffold(
         topBar = {
@@ -171,6 +171,18 @@ private fun Seguimiento(modelo: ClienteModelo) {
         modelo.orden?.let { TarjetaOrden(it) }
         OutlinedButton(onClick = modelo::actualizar, enabled = !modelo.ocupado, modifier = Modifier.fillMaxWidth()) {
             Text("Actualizar ahora")
+        }
+        if (modelo.opinando) {
+            OutlinedTextField(
+                value = modelo.mensajeOpinion,
+                onValueChange = { modelo.mensajeOpinion = it },
+                label = { Text("¿Qué te pareció?") },
+                minLines = 3,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Button(onClick = modelo::opinar, enabled = !modelo.ocupado, modifier = Modifier.fillMaxWidth()) { Text("Enviar opinión") }
+        } else {
+            OutlinedButton(onClick = { modelo.abrirOpinion(true) }, modifier = Modifier.fillMaxWidth()) { Text("Opinar sobre el servicio") }
         }
         TextButton(onClick = modelo::volverAMesa, modifier = Modifier.fillMaxWidth()) { Text("Hacer otro pedido") }
     }

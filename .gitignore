@@ -6,3 +6,6 @@ local.properties
 .kotlin/
 captures/
 apk/
+
+/keystore.properties
+/firma/

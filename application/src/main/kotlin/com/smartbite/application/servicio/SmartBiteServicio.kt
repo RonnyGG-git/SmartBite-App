@@ -1,7 +1,7 @@
 package com.smartbite.application.servicio
 
 import com.smartbite.application.dto.SesionVista
-import com.smartbite.application.puerto.entrada.CasosDeUso
+import com.smartbite.application.puerto.entrada.OperacionCasos
 import com.smartbite.domain.error.FalloRemoto
 import com.smartbite.domain.error.ReglaInvalida
 import com.smartbite.domain.modelo.Carrito
@@ -19,7 +19,6 @@ import com.smartbite.domain.modelo.PedidoCreado
 import com.smartbite.domain.modelo.Producto
 import com.smartbite.domain.modelo.Reserva
 import com.smartbite.domain.modelo.ResultadoCobro
-import com.smartbite.domain.modelo.Sesion
 import com.smartbite.domain.modelo.TipoConsumo
 import com.smartbite.domain.puerto.salida.AuthGateway
 import com.smartbite.domain.puerto.salida.CajaGateway
@@ -38,7 +37,7 @@ class SmartBiteServicio(
     private val cocina: CocinaGateway,
     private val caja: CajaGateway,
     private val sesiones: SesionStore,
-) : CasosDeUso {
+) : OperacionCasos {
 
     override suspend fun iniciarSesion(correo: String, clave: String): SesionVista {
         val correoValido = Correo.de(correo)
@@ -192,5 +191,4 @@ class SmartBiteServicio(
         if (!condicion) throw ReglaInvalida(mensaje)
     }
 
-    private fun Sesion.vista() = SesionVista(nombre = nombre, rol = rol, restaurante = restaurante)
 }
