@@ -1,5 +1,8 @@
 package com.smartbite.movil.ui.publico
 
+import androidx.compose.ui.text.style.TextOverflow
+import com.smartbite.movil.ui.componentes.Linea
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -218,6 +221,7 @@ private fun LazyListScope.lista(modelo: RestaurantesModelo) {
         Card(
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, Linea),
             modifier = Modifier.fillMaxWidth().clickable { modelo.abrir(sucursal) },
         ) {
             Column(Modifier.padding(16.dp)) {
@@ -241,17 +245,21 @@ private fun LazyListScope.menu(modelo: RestaurantesModelo) {
             Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                 FotoPlatillo(producto.imagen, producto.nombre, 72.dp)
                 Spacer(Modifier.width(12.dp))
-                Column(Modifier.weight(1f)) {
-                    Text(producto.nombre, fontWeight = FontWeight.SemiBold)
-                    if (producto.descripcion.isNotBlank()) Text(producto.descripcion, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
-                    Text(producto.precio.pesos(), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(producto.nombre, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    if (producto.descripcion.isNotBlank()) {
+                        Text(producto.descripcion, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(producto.precio.pesos(), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                        val cantidad = modelo.carrito.cantidadDe(producto.id)
+                        if (cantidad > 0) {
+                            TextButton(onClick = { modelo.quitar(producto) }) { Text("−") }
+                            Text("$cantidad", fontWeight = FontWeight.Bold)
+                        }
+                        TextButton(onClick = { modelo.agregar(producto) }) { Text("+") }
+                    }
                 }
-                val cantidad = modelo.carrito.cantidadDe(producto.id)
-                if (cantidad > 0) {
-                    TextButton(onClick = { modelo.quitar(producto) }) { Text("−") }
-                    Text("$cantidad", fontWeight = FontWeight.Bold)
-                }
-                TextButton(onClick = { modelo.agregar(producto) }) { Text("+") }
             }
         }
     }

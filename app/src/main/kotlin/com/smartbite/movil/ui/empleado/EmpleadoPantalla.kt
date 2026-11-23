@@ -1,5 +1,31 @@
 package com.smartbite.movil.ui.empleado
 
+import com.smartbite.movil.ui.componentes.TarjetaAccion
+import com.smartbite.movil.ui.componentes.Portada
+import com.smartbite.movil.ui.componentes.Encabezado
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.layout.statusBarsPadding
+import com.smartbite.movil.ui.componentes.Linea
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -53,20 +79,57 @@ import com.smartbite.movil.ui.mesero.MeseroPantalla
 import com.smartbite.movil.ui.navegacion.Rutas
 import kotlinx.coroutines.launch
 
-enum class Modulo(val titulo: String, val permitido: (Rol) -> Boolean) {
-    INICIO("Inicio", { it.administra }),
-    MESAS("Mesas", { it.atiendeMesas }),
-    COCINA("Cocina", { it.cocina }),
-    CAJA("Caja", { it.cobra }),
-    INVENTARIO("Inventario", { it.leeInventario }),
-    CATALOGO("Catálogo", { it.leeCatalogo }),
-    ADMINISTRACION("Admin", { it.administra }),
+enum class Modulo(val titulo: String, val icono: ImageVector, val permitido: (Rol) -> Boolean) {
+    INICIO("Inicio", Icons.Filled.Home, { it.administra }),
+    MESAS("Mesas", Icons.Filled.Place, { it.atiendeMesas }),
+    COCINA("Cocina", Icons.Filled.Star, { it.cocina }),
+    CAJA("Caja", Icons.Filled.ShoppingCart, { it.cobra }),
+    INVENTARIO("Inventario", Icons.AutoMirrored.Filled.List, { it.leeInventario }),
+    CATALOGO("Catálogo", Icons.Filled.Menu, { it.leeCatalogo }),
+    ADMINISTRACION("Admin", Icons.Filled.Settings, { it.administra }),
 }
+
+private val ICONOS = mapOf(
+    "productos" to Icons.Filled.Menu,
+    "categorias" to Icons.AutoMirrored.Filled.List,
+    "recetas" to Icons.Filled.Build,
+    "items" to Icons.AutoMirrored.Filled.List,
+    "movimientos" to Icons.Filled.Refresh,
+    "proveedores" to Icons.Filled.Call,
+    "mesas" to Icons.Filled.Place,
+    "usuarios" to Icons.Filled.Person,
+    "sucursales" to Icons.Filled.LocationOn,
+    "restaurantes" to Icons.Filled.Home,
+    "opiniones" to Icons.Filled.ThumbUp,
+)
+
+private val DETALLES = mapOf(
+    "productos" to "Platillos, precios, fotos y disponibilidad",
+    "categorias" to "Cómo se agrupa el menú",
+    "recetas" to "Ingredientes del inventario por platillo",
+    "items" to "Stock, mínimos y ajustes",
+    "movimientos" to "Entradas, salidas y pérdidas",
+    "proveedores" to "A quién le compras",
+    "mesas" to "Capacidad, sucursal y su código QR",
+    "usuarios" to "Empleados, roles y acceso",
+    "sucursales" to "Direcciones y teléfonos",
+    "restaurantes" to "Datos y código para tus empleados",
+    "opiniones" to "Lo que dicen tus clientes",
+)
 
 private sealed interface Seccion {
     val titulo: String
-    data class DeRecurso(val clave: String, override val titulo: String) : Seccion
-    data object Compras : Seccion { override val titulo = "Compras" }
+    val icono: ImageVector
+    val detalle: String
+    data class DeRecurso(val clave: String, override val titulo: String) : Seccion {
+        override val icono: ImageVector get() = ICONOS[clave] ?: Icons.Filled.Info
+        override val detalle: String get() = DETALLES[clave].orEmpty()
+    }
+    data object Compras : Seccion {
+        override val titulo = "Compras"
+        override val icono: ImageVector get() = Icons.Filled.ShoppingCart
+        override val detalle = "Pedidos a proveedores: recibir sube el stock"
+    }
 }
 
 private fun seccionesDe(modulo: Modulo, rol: Rol): List<Seccion> {
@@ -150,7 +213,7 @@ fun EmpleadoPantalla(alSalir: () -> Unit, alReiniciar: () -> Unit, alAbrir: (Str
                         NavigationBarItem(
                             selected = !mas && modulo == visible,
                             onClick = { elegido = modulo; mas = false; seccion = null },
-                            icon = { Text(modulo.titulo.take(1), fontWeight = FontWeight.Bold) },
+                            icon = { Icon(modulo.icono, contentDescription = null) },
                             label = { Text(modulo.titulo, maxLines = 1) },
                         )
                     }
@@ -158,7 +221,7 @@ fun EmpleadoPantalla(alSalir: () -> Unit, alReiniciar: () -> Unit, alAbrir: (Str
                         NavigationBarItem(
                             selected = mas || (visible != null && visible !in enBarra),
                             onClick = { mas = true; seccion = null },
-                            icon = { Text("+", fontWeight = FontWeight.Bold) },
+                            icon = { Icon(Icons.Filled.MoreVert, contentDescription = null) },
                             label = { Text("Más") },
                         )
                     }
@@ -168,7 +231,7 @@ fun EmpleadoPantalla(alSalir: () -> Unit, alReiniciar: () -> Unit, alAbrir: (Str
     ) { margen ->
         Box(Modifier.padding(margen).fillMaxSize()) {
             when {
-                mas -> ListaOpciones(modulos.drop(4).map { it.titulo }) { indice ->
+                mas -> ListaOpciones("Más módulos", modulos.drop(4).map { Triple(it.icono, it.titulo, "") }) { indice ->
                     elegido = modulos.drop(4)[indice]
                     mas = false
                     seccion = null
@@ -222,7 +285,7 @@ private fun ContenidoModulo(
             val secciones = seccionesDe(modulo, rol)
             Column(Modifier.fillMaxSize()) {
                 if (seccion == null) {
-                    ListaOpciones(secciones.map { it.titulo }) { alElegir(secciones[it]) }
+                    ListaOpciones(modulo.titulo, secciones.map { Triple(it.icono, it.titulo, it.detalle) }) { alElegir(secciones[it]) }
                 } else {
                     TextButton(onClick = { alElegir(null) }, modifier = Modifier.padding(horizontal = 8.dp)) { Text("‹ ${modulo.titulo}") }
                     when (seccion) {
@@ -236,33 +299,31 @@ private fun ContenidoModulo(
 }
 
 @Composable
-private fun ListaOpciones(titulos: List<String>, alElegir: (Int) -> Unit) {
-    LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        items(titulos.indices.toList()) { indice ->
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                modifier = Modifier.fillMaxWidth().clickable { alElegir(indice) },
-            ) {
-                Text(titulos[indice], fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(20.dp))
-            }
+private fun ListaOpciones(titulo: String, opciones: List<Triple<ImageVector, String, String>>, alElegir: (Int) -> Unit) {
+    LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        item { Encabezado(titulo) }
+        items(opciones.indices.toList()) { indice ->
+            val (icono, nombre, detalle) = opciones[indice]
+            TarjetaAccion(icono, nombre, detalle.ifBlank { null }) { alElegir(indice) }
         }
     }
 }
 
 @Composable
 private fun InicioCliente(sesion: SesionVista, alAbrir: (String) -> Unit, alSalir: () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp, alignment = Alignment.CenterVertically),
-    ) {
-        Text("Hola, ${sesion.nombre}", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        if (sesion.rol == Rol.DOMICILIARIO) {
-            Text("Las entregas a domicilio se manejan desde la web por ahora.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+        Column(Modifier.statusBarsPadding()) {
+            Portada(
+                etiqueta = "Smart Bite",
+                titulo = "Hola, ${sesion.nombre}",
+                detalle = if (sesion.rol == Rol.DOMICILIARIO) "Las entregas a domicilio se manejan desde la web por ahora." else "¿Qué se te antoja hoy?",
+            )
         }
-        Button(onClick = { alAbrir(Rutas.CLIENTE) }, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("Pedir en mi mesa") }
-        OutlinedButton(onClick = { alAbrir(Rutas.RESTAURANTES) }, modifier = Modifier.fillMaxWidth()) { Text("Restaurantes: para llevar y reservas") }
-        OutlinedButton(onClick = { alAbrir(Rutas.MIS_PEDIDOS) }, modifier = Modifier.fillMaxWidth()) { Text("Mis pedidos y reservas") }
-        TextButton(onClick = alSalir, modifier = Modifier.fillMaxWidth()) { Text("Cerrar sesión") }
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            TarjetaAccion(Icons.Filled.Place, "Pedir en mi mesa", "Escanea el QR de la mesa", destacada = true) { alAbrir(Rutas.CLIENTE) }
+            TarjetaAccion(Icons.Filled.Search, "Restaurantes", "Para llevar, reservas y opiniones") { alAbrir(Rutas.RESTAURANTES) }
+            TarjetaAccion(Icons.Filled.DateRange, "Mis pedidos y reservas", "Estado de lo que pediste") { alAbrir(Rutas.MIS_PEDIDOS) }
+            TextButton(onClick = alSalir, modifier = Modifier.fillMaxWidth()) { Text("Cerrar sesión") }
+        }
     }
 }

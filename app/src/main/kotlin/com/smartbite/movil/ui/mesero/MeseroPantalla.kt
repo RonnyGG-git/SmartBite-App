@@ -1,5 +1,8 @@
 package com.smartbite.movil.ui.mesero
 
+import androidx.compose.ui.text.style.TextOverflow
+import com.smartbite.movil.ui.componentes.Linea
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -224,7 +227,7 @@ fun MeseroPantalla() {
                         if (modelo.sinMesa.isEmpty() && !modelo.ocupado && modelo.error == null) item { Vacio("No hay pedidos sin mesa activos.") }
                         items(modelo.sinMesa, key = { it.id }) { orden ->
                             TarjetaOrden(orden) {
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     if (orden.estado.activa) {
                                         OutlinedButton(onClick = { modelo.elegirMesaPara(orden) }, enabled = !modelo.ocupado) { Text("Asignar mesa") }
                                     }
@@ -301,18 +304,24 @@ private fun androidx.compose.foundation.lazy.LazyListScope.detalleOrden(modelo: 
             Card(
                 shape = RoundedCornerShape(14.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, Linea),
             ) {
-                Row(Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                    FotoPlatillo(producto.imagen, producto.nombre, 52.dp)
-                    Spacer(Modifier.width(10.dp))
-                    Column(Modifier.weight(1f)) {
-                        Text(producto.nombre, fontWeight = FontWeight.SemiBold)
-                        Text(producto.precio.pesos(), color = MaterialTheme.colorScheme.primary)
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        FotoPlatillo(producto.imagen, producto.nombre, 56.dp)
+                        Spacer(Modifier.width(12.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(producto.nombre, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                            Text(producto.precio.pesos(), color = MaterialTheme.colorScheme.primary)
+                        }
                     }
-                    TextButton(onClick = { modelo.cambiarCantidad(producto, -1) }) { Text("−") }
-                    Text("$cuantas", fontWeight = FontWeight.Bold)
-                    TextButton(onClick = { modelo.cambiarCantidad(producto, 1) }) { Text("+") }
-                    Button(onClick = { modelo.agregar(producto) }, enabled = !modelo.ocupado) { Text("Agregar") }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        OutlinedButton(onClick = { modelo.cambiarCantidad(producto, -1) }, enabled = cuantas > 1) { Text("−") }
+                        Text("$cuantas", fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 14.dp))
+                        OutlinedButton(onClick = { modelo.cambiarCantidad(producto, 1) }) { Text("+") }
+                        Spacer(Modifier.weight(1f))
+                        Button(onClick = { modelo.agregar(producto) }, enabled = !modelo.ocupado) { Text("Agregar") }
+                    }
                 }
             }
         }
@@ -325,10 +334,11 @@ private fun TarjetaMesa(modelo: MeseroModelo, mesa: Mesa) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, Linea),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Mesa ${mesa.numero}", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                Text("Mesa ${mesa.numero}", fontWeight = FontWeight.Bold, maxLines = 1, modifier = Modifier.weight(1f))
                 if (enMesa != null) Etiqueta(enMesa.estado) else Text(mesa.estado.etiqueta)
             }
             enMesa?.let { Text("Orden #${it.id} · ${it.total.pesos()}" + if (it.cuentaSolicitada) " · cuenta pedida" else "") }
@@ -356,6 +366,7 @@ private fun TarjetaReserva(modelo: MeseroModelo, reserva: Reserva) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, Linea),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text("${reserva.nombre} · ${reserva.personas} personas", fontWeight = FontWeight.Bold)

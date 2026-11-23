@@ -1,5 +1,6 @@
 package com.smartbite.movil.ui.login
 
+import com.smartbite.movil.ui.componentes.Logo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -71,6 +72,7 @@ fun LoginPantalla(
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp, alignment = Alignment.CenterVertically),
     ) {
+        Logo(64)
         Text("Entrar a Smart Bite", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         if (vencida) Mensajes(error = "Tu sesión terminó. Vuelve a entrar.", aviso = null)
         Mensajes(error = modelo.error, aviso = null)

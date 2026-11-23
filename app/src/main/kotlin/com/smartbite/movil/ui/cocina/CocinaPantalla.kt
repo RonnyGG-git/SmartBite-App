@@ -1,5 +1,8 @@
 package com.smartbite.movil.ui.cocina
 
+import androidx.compose.foundation.layout.FlowRow
+import com.smartbite.movil.ui.componentes.Vacio
+import com.smartbite.movil.ui.componentes.Encabezado
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -56,7 +59,9 @@ fun CocinaPantalla() {
     val modelo: CocinaModelo = viewModel { CocinaModelo(app) }
 
     LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        item { Encabezado("Comandas", "${modelo.comandas.count { it.estado == EstadoOrden.PENDIENTE }} por empezar · ${modelo.comandas.count { it.estado == EstadoOrden.EN_PREPARACION }} en preparación") }
         item { Mensajes(error = modelo.error, aviso = modelo.aviso) }
+        if (modelo.comandas.isEmpty() && !modelo.ocupado && modelo.error == null) item { Vacio("No hay comandas. ¡Cocina al día!") }
         item {
             OutlinedButton(onClick = modelo::cargar, enabled = !modelo.ocupado, modifier = Modifier.fillMaxWidth()) {
                 Text(if (modelo.ocupado) "Cargando…" else "Actualizar comandas (${modelo.comandas.size})")
@@ -66,10 +71,10 @@ fun CocinaPantalla() {
             TarjetaOrden(orden) {
                 if (orden.estado == EstadoOrden.PENDIENTE) {
                     Text("¿En cuánto sale?")
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         TIEMPOS.forEach { minutos ->
                             OutlinedButton(onClick = { modelo.empezar(orden, minutos) }, enabled = !modelo.ocupado) {
-                                Text("$minutos")
+                                Text("$minutos min", maxLines = 1)
                             }
                         }
                     }

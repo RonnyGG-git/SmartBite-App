@@ -1,5 +1,7 @@
 package com.smartbite.movil.ui.gestion
 
+import com.smartbite.movil.ui.componentes.Linea
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -84,6 +86,7 @@ private fun Cifra(etiqueta: String, valor: String, modifier: Modifier) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, Linea),
         modifier = modifier,
     ) {
         Column(Modifier.padding(14.dp)) {
@@ -98,6 +101,7 @@ private fun Bloque(titulo: String, filas: List<FilaTablero>, vacio: String = "Si
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, Linea),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {

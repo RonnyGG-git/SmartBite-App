@@ -1,5 +1,8 @@
 package com.smartbite.movil.ui.gestion
 
+import com.smartbite.movil.ui.componentes.Encabezado
+import com.smartbite.movil.ui.componentes.Linea
+import androidx.compose.foundation.BorderStroke
 import android.graphics.BitmapFactory
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -232,6 +235,7 @@ fun GestionPantalla(recurso: Recurso, rol: Rol, alElegirRestaurante: (Ficha) -> 
                 )
             }
         } else {
+            item { Encabezado(recurso.titulo, "${modelo.fichas.size} en total" + if (gestiona) "" else " · solo lectura") }
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
@@ -270,6 +274,7 @@ private fun FilaFicha(recurso: Recurso, ficha: Ficha, alAbrir: () -> Unit) {
     Card(
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, Linea),
         modifier = Modifier.fillMaxWidth().clickable(onClick = alAbrir),
     ) {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {

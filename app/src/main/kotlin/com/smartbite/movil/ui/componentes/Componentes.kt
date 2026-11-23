@@ -1,5 +1,9 @@
 package com.smartbite.movil.ui.componentes
 
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,6 +45,8 @@ fun Etiqueta(estado: EstadoOrden) {
     Text(
         text = estado.etiqueta,
         color = color,
+        maxLines = 1,
+        softWrap = false,
         fontSize = 12.sp,
         fontWeight = FontWeight.SemiBold,
         modifier = Modifier
@@ -99,11 +105,7 @@ fun <T> Pestanas(opciones: List<T>, elegida: T, titulo: (T) -> String, alElegir:
 
 @Composable
 fun Vacio(texto: String) {
-    Text(
-        texto,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
-    )
+    EstadoVacio(Icons.Filled.Info, texto)
 }
 
 @Composable
@@ -111,6 +113,7 @@ fun TarjetaOrden(orden: Orden, acciones: @Composable () -> Unit = {}) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, Linea),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -118,14 +121,16 @@ fun TarjetaOrden(orden: Orden, acciones: @Composable () -> Unit = {}) {
                 Text(
                     text = "Orden #${orden.id}" + (orden.mesa?.let { " · Mesa $it" } ?: if (orden.paraLlevar) " · Para llevar" else " · Sin mesa"),
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f).padding(end = 8.dp),
                 )
                 Etiqueta(orden.estado)
             }
             orden.cliente?.let { Text("Cliente: $it", color = MaterialTheme.colorScheme.onSurfaceVariant) }
             orden.lineas.forEach { linea ->
                 Row {
-                    Text("${linea.cantidad} × ${linea.nombre}", Modifier.weight(1f))
+                    Text("${linea.cantidad} × ${linea.nombre}", Modifier.weight(1f).padding(end = 8.dp))
                     Text(linea.subtotal.pesos(), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }

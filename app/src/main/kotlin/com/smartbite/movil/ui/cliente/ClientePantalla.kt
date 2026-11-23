@@ -1,5 +1,8 @@
 package com.smartbite.movil.ui.cliente
 
+import androidx.compose.ui.text.style.TextOverflow
+import com.smartbite.movil.ui.componentes.Linea
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -109,23 +112,26 @@ private fun FilaMenu(modelo: ClienteModelo, producto: Producto) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, Linea),
     ) {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             FotoPlatillo(producto.imagen, producto.nombre, 76.dp)
             Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                Text(producto.nombre, fontWeight = FontWeight.SemiBold)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(producto.nombre, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 if (producto.descripcion.isNotBlank()) {
-                    Text(producto.descripcion, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
+                    Text(producto.descripcion, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
-                Text(producto.precio.pesos(), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(producto.precio.pesos(), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    val cantidad = modelo.carrito.cantidadDe(producto.id)
+                    if (cantidad > 0) {
+                        TextButton(onClick = { modelo.quitar(producto) }) { Text("−") }
+                        Text("$cantidad", fontWeight = FontWeight.Bold)
+                    }
+                    TextButton(onClick = { modelo.agregar(producto) }) { Text("+") }
+                }
             }
-            val cantidad = modelo.carrito.cantidadDe(producto.id)
-            if (cantidad > 0) {
-                TextButton(onClick = { modelo.quitar(producto) }) { Text("−") }
-                Text("$cantidad", fontWeight = FontWeight.Bold)
-            }
-            TextButton(onClick = { modelo.agregar(producto) }) { Text("+") }
         }
     }
 }

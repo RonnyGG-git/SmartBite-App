@@ -1,5 +1,7 @@
 package com.smartbite.movil.ui.caja
 
+import com.smartbite.movil.ui.componentes.Linea
+import androidx.compose.foundation.BorderStroke
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -295,6 +297,7 @@ private fun LazyListScope.listas(modelo: CajaModelo) {
                 Card(
                     shape = RoundedCornerShape(14.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, Linea),
                     modifier = Modifier.fillMaxWidth().clickable { modelo.verFactura(resumen.id) },
                 ) {
                     Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -321,6 +324,7 @@ private fun LazyListScope.panelCobro(modelo: CajaModelo, cuenta: Cuenta) {
         Card(
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, Linea),
         ) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Fila("Total", cuenta.orden.total.pesos())
