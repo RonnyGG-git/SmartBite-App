@@ -37,8 +37,8 @@ fun BienvenidaPantalla(
         Column(Modifier.statusBarsPadding()) {
             Portada(
                 etiqueta = "Smart Bite",
-                titulo = "Del QR de tu mesa a la cocina, sin esperar al mesero.",
-                detalle = "Pide, sigue tu pedido y paga desde tu teléfono.",
+                titulo = "Sala, cocina y caja al mismo ritmo.",
+                detalle = "La plataforma para operar tu restaurante o toda tu red de franquicias desde un solo lugar.",
             )
         }
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {

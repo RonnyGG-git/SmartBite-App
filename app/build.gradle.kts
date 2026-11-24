@@ -20,8 +20,8 @@ android {
         applicationId = "com.smartbite.movil"
         minSdk = 26
         targetSdk = 36
-        versionCode = 4
-        versionName = "1.1"
+        versionCode = 5
+        versionName = "1.2"
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
     }
 
