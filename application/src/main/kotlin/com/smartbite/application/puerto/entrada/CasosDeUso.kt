@@ -11,6 +11,7 @@ import com.smartbite.domain.modelo.Mesa
 import com.smartbite.domain.modelo.MesaQr
 import com.smartbite.domain.modelo.MetodoPago
 import com.smartbite.domain.modelo.Orden
+import com.smartbite.domain.modelo.PagoRegistrado
 import com.smartbite.domain.modelo.PedidoCreado
 import com.smartbite.domain.modelo.Producto
 import com.smartbite.domain.modelo.Reserva
@@ -68,6 +69,7 @@ interface CajaCasos {
         referencia: String,
     ): ResultadoCobro
     suspend fun generarQr(cuenta: Cuenta): CodigoQr
+    suspend fun anularIntento(pago: PagoRegistrado): Cuenta
     suspend fun aceptarParaLlevar(orden: Orden): Orden
     suspend fun rechazarParaLlevar(orden: Orden): Orden
     suspend fun entregar(orden: Orden): Orden

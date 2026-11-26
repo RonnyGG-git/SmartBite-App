@@ -55,6 +55,7 @@ import com.smartbite.domain.modelo.Factura
 import com.smartbite.domain.modelo.FacturaResumen
 import com.smartbite.domain.modelo.MetodoPago
 import com.smartbite.domain.modelo.Orden
+import com.smartbite.domain.modelo.PagoRegistrado
 import com.smartbite.domain.modelo.ResultadoCobro
 import com.smartbite.movil.ui.ModeloBase
 import com.smartbite.movil.ui.casos
@@ -88,6 +89,8 @@ class CajaModelo(private val caja: CajaCasos) : ModeloBase() {
     var cuenta by mutableStateOf<Cuenta?>(null)
         private set
     var qr by mutableStateOf<CodigoQr?>(null)
+        private set
+    var porAnular by mutableStateOf<PagoRegistrado?>(null)
         private set
     var factura by mutableStateOf<Factura?>(null)
         private set
@@ -193,6 +196,24 @@ class CajaModelo(private val caja: CajaCasos) : ModeloBase() {
         qr = null
     }
 
+    fun pedirAnular(pago: PagoRegistrado) {
+        porAnular = pago
+    }
+
+    fun cancelarAnular() {
+        porAnular = null
+    }
+
+    fun anular() {
+        val pago = porAnular ?: return
+        porAnular = null
+        trabajar("Intento de pago anulado. El saldo quedó libre para cobrar.") {
+            val nueva = caja.anularIntento(pago)
+            cuenta = nueva
+            monto = nueva.saldoDisponible.paraEditar()
+        }
+    }
+
     fun cerrarCobro() {
         vigilancia?.cancel()
         cuenta = null
@@ -255,6 +276,15 @@ fun CajaPantalla() {
     }
 
     modelo.qr?.let { codigo -> DialogoQr(modelo, codigo) }
+    modelo.porAnular?.let { pago ->
+        AlertDialog(
+            onDismissRequest = modelo::cancelarAnular,
+            title = { Text("¿Anular el intento de ${(pago.monto + pago.propina).pesos()}?") },
+            text = { Text("Hazlo solo si el cliente no terminó el pago en línea. El saldo vuelve a quedar libre para cobrar.") },
+            confirmButton = { TextButton(onClick = modelo::anular) { Text("Anular") } },
+            dismissButton = { TextButton(onClick = modelo::cancelarAnular) { Text("No") } },
+        )
+    }
 }
 
 private fun LazyListScope.listas(modelo: CajaModelo) {
@@ -335,6 +365,11 @@ private fun LazyListScope.panelCobro(modelo: CajaModelo, cuenta: Cuenta) {
                         "· ${pago.metodo} ${pago.monto.pesos()}" + (if (pago.propina.positivo) " + propina ${pago.propina.pesos()}" else "") + " (${pago.estado})",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    if (pago.anulable) {
+                        OutlinedButton(onClick = { modelo.pedirAnular(pago) }, enabled = !modelo.ocupado) {
+                            Text("Anular intento")
+                        }
+                    }
                 }
             }
         }

@@ -16,6 +16,7 @@ import com.smartbite.domain.modelo.MesaQr
 import com.smartbite.domain.modelo.MetodoPago
 import com.smartbite.domain.modelo.Orden
 import com.smartbite.domain.modelo.OrdenEnMesa
+import com.smartbite.domain.modelo.PagoRegistrado
 import com.smartbite.domain.modelo.PedidoCreado
 import com.smartbite.domain.modelo.Producto
 import com.smartbite.domain.modelo.Reserva
@@ -87,6 +88,7 @@ class SmartBiteServicioTest {
             return ResultadoCobro.Registrado(cuenta("0"), null)
         }
         override suspend fun qr(ordenId: Int) = CodigoQr("https://x", ByteArray(1), Dinero.de("1"))
+        override suspend fun anularPago(pagoId: Int) = cuenta().also { llamadas += "anular:$pagoId" }
         override suspend fun aceptarParaLlevar(ordenId: Int) = orden(EstadoOrden.PENDIENTE, mesa = null).also { llamadas += "aceptar" }
         override suspend fun rechazarParaLlevar(ordenId: Int) = orden(EstadoOrden.CANCELADA, mesa = null)
         override suspend fun ventas() = emptyList<Orden>()
@@ -204,6 +206,15 @@ class SmartBiteServicioTest {
         val resultado = servicio.cobrar(cuenta(), efectivo, "32.000", "", "40.000", "")
         assertEquals(listOf("cobrar:32000.00"), llamadas)
         assertEquals(Dinero.de("8000"), (resultado as ResultadoCobro.Registrado).cambio)
+    }
+
+    @Test
+    fun `solo se anulan intentos en linea pendientes`() = runTest {
+        val aprobado = PagoRegistrado(5, "Tarjeta", Dinero.de("32000"), Dinero.CERO, "Aprobado", aprobado = true)
+        esperarRegla { servicio.anularIntento(aprobado) }
+        assertTrue(llamadas.isEmpty())
+        servicio.anularIntento(aprobado.copy(id = 6, aprobado = false, anulable = true))
+        assertEquals(listOf("anular:6"), llamadas)
     }
 
     @Test

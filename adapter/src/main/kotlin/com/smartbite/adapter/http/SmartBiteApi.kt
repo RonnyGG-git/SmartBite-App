@@ -113,6 +113,9 @@ interface SmartBiteApi {
     @POST("api/v1/caja/ordenes/{id}/qr/")
     suspend fun qr(@Header("Authorization") token: String, @Path("id") ordenId: Int): Response<QrDto>
 
+    @POST("api/v1/caja/pagos/{id}/anular/")
+    suspend fun anularPago(@Header("Authorization") token: String, @Path("id") pagoId: Int): Response<CuentaDto>
+
     @POST("api/v1/caja/ordenes/{id}/{accion}/")
     suspend fun accionCaja(
         @Header("Authorization") token: String,

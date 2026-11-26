@@ -129,6 +129,8 @@ class SmartBiteHttp(
 
     override suspend fun qr(ordenId: Int): CodigoQr = llamar.conSesion { token -> api.qr(token, ordenId) }.aDominio()
 
+    override suspend fun anularPago(pagoId: Int): Cuenta = llamar.conSesion { token -> api.anularPago(token, pagoId) }.aDominio()
+
     override suspend fun aceptarParaLlevar(ordenId: Int): Orden =
         llamar.conSesion { token -> api.accionCaja(token, ordenId, "aceptar") }.aDominio()
 

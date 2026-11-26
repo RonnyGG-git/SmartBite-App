@@ -145,6 +145,7 @@ fun CuentaDto.aDominio(): Cuenta = traducir {
                 propina = Dinero.de(it.propina ?: "0"),
                 estado = it.estadoNombre ?: it.estado.orEmpty(),
                 aprobado = it.estado == "APROBADO",
+                anulable = it.anulable == true,
             )
         },
         facturaId = factura,

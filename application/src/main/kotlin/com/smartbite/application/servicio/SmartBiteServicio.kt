@@ -15,6 +15,7 @@ import com.smartbite.domain.modelo.Mesa
 import com.smartbite.domain.modelo.MesaQr
 import com.smartbite.domain.modelo.MetodoPago
 import com.smartbite.domain.modelo.Orden
+import com.smartbite.domain.modelo.PagoRegistrado
 import com.smartbite.domain.modelo.PedidoCreado
 import com.smartbite.domain.modelo.Producto
 import com.smartbite.domain.modelo.Reserva
@@ -164,6 +165,11 @@ class SmartBiteServicio(
     override suspend fun generarQr(cuenta: Cuenta): CodigoQr {
         exigir(cuenta.orden.estado.activa, "La orden ya está cerrada.")
         return caja.qr(cuenta.orden.id)
+    }
+
+    override suspend fun anularIntento(pago: PagoRegistrado): Cuenta {
+        exigir(pago.anulable, "Solo se anulan pagos en línea que siguen pendientes.")
+        return caja.anularPago(pago.id)
     }
 
     override suspend fun aceptarParaLlevar(orden: Orden): Orden {

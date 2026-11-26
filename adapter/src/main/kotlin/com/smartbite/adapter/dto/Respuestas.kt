@@ -78,6 +78,7 @@ data class PagoDto(
     val propina: String?,
     val estado: String?,
     val estadoNombre: String?,
+    val anulable: Boolean? = null,
 )
 
 data class CuentaDto(

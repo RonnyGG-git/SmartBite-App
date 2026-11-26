@@ -12,6 +12,7 @@ data class PagoRegistrado(
     val propina: Dinero,
     val estado: String,
     val aprobado: Boolean,
+    val anulable: Boolean = false,
 )
 
 data class Cuenta(

@@ -62,6 +62,7 @@ interface CajaGateway {
     suspend fun metodos(): List<MetodoPago>
     suspend fun cuenta(ordenId: Int): Cuenta
     suspend fun cobrar(ordenId: Int, cobro: Cobro): ResultadoCobro
+    suspend fun anularPago(pagoId: Int): Cuenta
     suspend fun qr(ordenId: Int): CodigoQr
     suspend fun aceptarParaLlevar(ordenId: Int): Orden
     suspend fun rechazarParaLlevar(ordenId: Int): Orden
