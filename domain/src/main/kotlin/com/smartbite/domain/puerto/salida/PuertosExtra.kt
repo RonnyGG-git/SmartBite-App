@@ -7,14 +7,17 @@ import com.smartbite.domain.modelo.Ficha
 import com.smartbite.domain.modelo.NuevaReserva
 import com.smartbite.domain.modelo.Opcion
 import com.smartbite.domain.modelo.Opinion
+import com.smartbite.domain.modelo.PagoCliente
 import com.smartbite.domain.modelo.PedidoCreado
 import com.smartbite.domain.modelo.Recurso
 import com.smartbite.domain.modelo.Registro
+import com.smartbite.domain.modelo.ReportePdf
 import com.smartbite.domain.modelo.ReservaCliente
 import com.smartbite.domain.modelo.Sesion
 import com.smartbite.domain.modelo.SucursalPublica
 import com.smartbite.domain.modelo.Tablero
 import com.smartbite.domain.valor.Correo
+import java.time.LocalDate
 
 interface CuentaGateway {
     suspend fun registrar(registro: Registro): String
@@ -31,6 +34,7 @@ interface PublicoGateway {
     suspend fun reserva(codigo: String): ReservaCliente
     suspend fun cancelarReserva(codigo: String): ReservaCliente
     suspend fun opinar(opinion: Opinion)
+    suspend fun pagarPedido(codigo: String): PagoCliente
 }
 
 interface GestionGateway {
@@ -48,6 +52,7 @@ interface GestionGateway {
     suspend fun crearCompra(proveedorId: Int, lineas: List<Triple<Int, Int, String>>): Compra
     suspend fun recibirCompra(id: Int): Compra
     suspend fun anularCompra(id: Int): Compra
+    suspend fun reportePdf(desde: LocalDate, hasta: LocalDate): ReportePdf
 }
 
 interface HistorialLocal {

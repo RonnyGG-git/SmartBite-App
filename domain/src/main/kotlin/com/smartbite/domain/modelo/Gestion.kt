@@ -105,6 +105,22 @@ data class Tablero(
     val ventasPorMetodo: List<FilaTablero>,
 )
 
+class ReportePdf(val nombre: String, val bytes: ByteArray)
+
+enum class PeriodoReporte(val etiqueta: String) {
+    HOY("Hoy"),
+    SEMANA("Últimos 7 días"),
+    MES("Este mes"),
+    MES_PASADO("Mes pasado");
+
+    fun rango(hoy: java.time.LocalDate): Pair<java.time.LocalDate, java.time.LocalDate> = when (this) {
+        HOY -> hoy to hoy
+        SEMANA -> hoy.minusDays(6) to hoy
+        MES -> hoy.withDayOfMonth(1) to hoy
+        MES_PASADO -> hoy.minusMonths(1).withDayOfMonth(1).let { inicio -> inicio to inicio.withDayOfMonth(inicio.lengthOfMonth()) }
+    }
+}
+
 data class LineaCompra(val itemId: Int, val item: String, val cantidad: Int, val costo: com.smartbite.domain.valor.Dinero) {
     val subtotal get() = costo * cantidad
 }

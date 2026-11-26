@@ -23,9 +23,11 @@ import com.smartbite.domain.modelo.LineaCompra
 import com.smartbite.domain.modelo.NuevaReserva
 import com.smartbite.domain.modelo.Opcion
 import com.smartbite.domain.modelo.Opinion
+import com.smartbite.domain.modelo.PagoCliente
 import com.smartbite.domain.modelo.PedidoCreado
 import com.smartbite.domain.modelo.Recurso
 import com.smartbite.domain.modelo.Registro
+import com.smartbite.domain.modelo.ReportePdf
 import com.smartbite.domain.modelo.ReservaCliente
 import com.smartbite.domain.modelo.Sesion
 import com.smartbite.domain.modelo.SucursalPublica
@@ -39,6 +41,7 @@ import com.smartbite.domain.valor.Dinero
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.time.LocalDate
 import java.util.Base64
 
 class CuentaHttp(private val api: ApiExtra, private val llamar: LlamadaApi) : CuentaGateway {
@@ -97,6 +100,12 @@ class PublicoHttp(private val api: ApiExtra, private val llamar: LlamadaApi) : P
 
     override suspend fun opinar(opinion: Opinion) {
         llamar.publica { api.opinar(OpinionBody(opinion.tipo.name, opinion.mensaje, opinion.nombre, opinion.contacto, opinion.mesaId)) }
+    }
+
+    override suspend fun pagarPedido(codigo: String): PagoCliente {
+        val dto = llamar.publica { api.pagarPedido(codigo) }
+        val url = dto.url ?: throw FalloRemoto.RespuestaInvalida()
+        return PagoCliente(url, Dinero.de(dto.saldoPendiente ?: "0"), conWompi = dto.enLinea == "wompi")
     }
 
     private fun ReservaPublicaDto.aDominio(): ReservaCliente {
@@ -224,4 +233,10 @@ class GestionHttp(private val api: ApiExtra, private val llamar: LlamadaApi) : G
     override suspend fun recibirCompra(id: Int): Compra = llamar.conSesion { token -> api.accionCompra(token, id, "recibir") }.aDominio()
 
     override suspend fun anularCompra(id: Int): Compra = llamar.conSesion { token -> api.accionCompra(token, id, "anular") }.aDominio()
+
+    override suspend fun reportePdf(desde: LocalDate, hasta: LocalDate): ReportePdf {
+        val cuerpo = llamar.conSesion { token -> api.reportePdf(token, desde.toString(), hasta.toString()) }
+        val bytes = cuerpo.use { it.bytes() }
+        return ReportePdf("reporte-smartbite-$desde-a-$hasta.pdf", bytes)
+    }
 }

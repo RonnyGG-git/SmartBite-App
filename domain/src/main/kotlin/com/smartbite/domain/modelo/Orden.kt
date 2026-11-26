@@ -16,9 +16,11 @@ data class Orden(
     val faltantes: List<String> = emptyList(),
     val cuentaSolicitada: Boolean = false,
     val paraLlevar: Boolean = false,
+    val pagaraEfectivo: Boolean = false,
 ) {
     val esperaConfirmacion: Boolean get() = estado == EstadoOrden.POR_CONFIRMAR
     val puedeEntregarse: Boolean get() = estado == EstadoOrden.LISTA && pagada
     val sinMesa: Boolean get() = mesa == null
     val cancelablePorMesero: Boolean get() = estado == EstadoOrden.PENDIENTE
+    val pagablePorCliente: Boolean get() = !pagada && estado.activa && estado != EstadoOrden.POR_CONFIRMAR
 }

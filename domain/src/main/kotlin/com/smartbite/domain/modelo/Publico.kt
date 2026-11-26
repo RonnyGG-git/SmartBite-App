@@ -63,3 +63,5 @@ data class Opinion(val tipo: TipoOpinion, val mensaje: String, val nombre: Strin
 }
 
 data class PedidoGuardado(val codigo: String, val orden: Orden)
+
+data class PagoCliente(val url: String, val saldo: com.smartbite.domain.valor.Dinero, val conWompi: Boolean)

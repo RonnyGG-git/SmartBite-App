@@ -5,6 +5,7 @@ import com.smartbite.adapter.dto.CompraDto
 import com.smartbite.adapter.dto.CorreoBody
 import com.smartbite.adapter.dto.MensajeDto
 import com.smartbite.adapter.dto.OpinionBody
+import com.smartbite.adapter.dto.PagoClienteDto
 import com.smartbite.adapter.dto.Pagina
 import com.smartbite.adapter.dto.PedidoCreadoDto
 import com.smartbite.adapter.dto.PedidoPublicoBody
@@ -18,6 +19,7 @@ import com.smartbite.adapter.dto.SucursalPublicaDto
 import com.smartbite.adapter.dto.TableroDto
 import com.smartbite.adapter.dto.VerificarBody
 import okhttp3.MultipartBody
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -65,6 +67,16 @@ interface ApiExtra {
 
     @POST("api/v1/publico/opiniones/")
     suspend fun opinar(@Body body: OpinionBody): Response<JsonElement>
+
+    @POST("api/v1/publico/pedidos/{codigo}/pago/")
+    suspend fun pagarPedido(@Path("codigo") codigo: String): Response<PagoClienteDto>
+
+    @GET("api/v1/gestion/reportes/pdf/")
+    suspend fun reportePdf(
+        @Header("Authorization") token: String,
+        @Query("desde") desde: String,
+        @Query("hasta") hasta: String,
+    ): Response<ResponseBody>
 
     @GET
     suspend fun leer(@Header("Authorization") token: String, @Url ruta: String): Response<JsonElement>

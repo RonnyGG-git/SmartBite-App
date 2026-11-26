@@ -19,6 +19,8 @@ data class RestablecerBody(val email: String, val codigo: String, val password1:
 
 data class MensajeDto(val detail: String?)
 
+data class PagoClienteDto(val url: String?, val saldoPendiente: String?, val enLinea: String?)
+
 data class SucursalPublicaDto(
     val id: Int?,
     val nombre: String?,

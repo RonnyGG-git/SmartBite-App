@@ -143,6 +143,7 @@ fun TarjetaOrden(orden: Orden, acciones: @Composable () -> Unit = {}) {
                 Text(
                     when {
                         orden.pagada -> "Pagada"
+                        orden.pagaraEfectivo -> "💵 Pagará en efectivo"
                         orden.cuentaSolicitada -> "Cuenta pedida"
                         else -> "Sin pagar"
                     },

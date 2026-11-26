@@ -30,11 +30,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -346,6 +348,20 @@ class MisPedidosModelo(private val publico: PublicoCasos) : ModeloBase() {
         publico.cancelarReservaCliente(reserva.codigo)
         reservas = publico.misReservas()
     }
+
+    var enlacePago by mutableStateOf<String?>(null)
+        private set
+
+    fun pagar(pedido: PedidoGuardado) = trabajar {
+        val pago = publico.pagarPedido(pedido)
+        aviso = if (pago.conWompi) "Elige «Pagar en línea» (Nequi, PSE o tarjeta) o «Pagar en efectivo en caja»."
+        else "Elige cómo pagar: en línea o en efectivo en caja."
+        enlacePago = pago.url
+    }
+
+    fun pagoAbierto() {
+        enlacePago = null
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -353,6 +369,14 @@ class MisPedidosModelo(private val publico: PublicoCasos) : ModeloBase() {
 fun MisPedidosPantalla(alVolver: () -> Unit) {
     val app = casos()
     val modelo: MisPedidosModelo = viewModel { MisPedidosModelo(app) }
+    val navegador = LocalUriHandler.current
+
+    LaunchedEffect(modelo.enlacePago) {
+        modelo.enlacePago?.let { enlace ->
+            navegador.openUri(enlace)
+            modelo.pagoAbierto()
+        }
+    }
 
     Scaffold(topBar = { TopAppBar(title = { Text("Mis pedidos y reservas") }, navigationIcon = { TextButton(onClick = alVolver) { Text("Atrás") } }) }) { margen ->
         Column(Modifier.padding(margen)) {
@@ -366,7 +390,13 @@ fun MisPedidosPantalla(alVolver: () -> Unit) {
                 }
                 if (modelo.pestana == PestanaMios.PEDIDOS) {
                     if (modelo.pedidos.isEmpty() && !modelo.ocupado && modelo.error == null) item { Vacio("Los pedidos que hagas desde este teléfono aparecen aquí.") }
-                    items(modelo.pedidos, key = { it.codigo }) { guardado -> TarjetaOrden(guardado.orden) }
+                    items(modelo.pedidos, key = { it.codigo }) { guardado ->
+                        TarjetaOrden(guardado.orden) {
+                            if (guardado.orden.pagablePorCliente) {
+                                Button(onClick = { modelo.pagar(guardado) }, enabled = !modelo.ocupado) { Text("Pagar") }
+                            }
+                        }
+                    }
                 } else {
                     if (modelo.reservas.isEmpty() && !modelo.ocupado && modelo.error == null) item { Vacio("Tus reservas aparecen aquí.") }
                     items(modelo.reservas, key = { it.codigo }) { reserva ->

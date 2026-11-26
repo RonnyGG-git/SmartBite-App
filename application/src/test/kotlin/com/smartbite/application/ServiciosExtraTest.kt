@@ -9,8 +9,10 @@ import com.smartbite.domain.modelo.CodigoQr
 import com.smartbite.domain.modelo.Compra
 import com.smartbite.domain.modelo.Ficha
 import com.smartbite.domain.modelo.Opcion
+import com.smartbite.domain.modelo.PeriodoReporte
 import com.smartbite.domain.modelo.Recurso
 import com.smartbite.domain.modelo.Registro
+import com.smartbite.domain.modelo.ReportePdf
 import com.smartbite.domain.modelo.RestauranteRef
 import com.smartbite.domain.modelo.Rol
 import com.smartbite.domain.modelo.Sesion
@@ -21,6 +23,7 @@ import com.smartbite.domain.puerto.salida.GestionGateway
 import com.smartbite.domain.puerto.salida.SesionStore
 import com.smartbite.domain.valor.Correo
 import com.smartbite.domain.valor.Dinero
+import java.time.LocalDate
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -62,9 +65,11 @@ class ServiciosExtraTest {
             Compra(1, "P", "PENDIENTE", "Pendiente", Dinero.CERO, "", emptyList()).also { llamadas += "compra:$lineas" }
         override suspend fun recibirCompra(id: Int) = Compra(id, "P", "RECIBIDA", "Recibida", Dinero.CERO, "", emptyList())
         override suspend fun anularCompra(id: Int) = Compra(id, "P", "ANULADA", "Anulada", Dinero.CERO, "", emptyList())
+        override suspend fun reportePdf(desde: LocalDate, hasta: LocalDate) =
+            ReportePdf("r.pdf", if (desde.year == 2000) ByteArray(0) else "%PDF".toByteArray()).also { llamadas += "reporte:$desde:$hasta" }
     }
 
-    private val gestion = GestionServicio(gestionFalsa)
+    private val gestion = GestionServicio(gestionFalsa) { LocalDate.of(2026, 11, 26) }
     private val cuentas = CuentasServicio(cuentasFalsas, memoria)
 
     @Test
@@ -151,4 +156,25 @@ class ServiciosExtraTest {
         assertEquals(listOf("registrar:CLIENTE"), llamadas)
     }
 
+    @Test
+    fun `el reporte pide al servidor el rango del periodo elegido`() = runTest {
+        gestion.reportePdf(PeriodoReporte.MES)
+        gestion.reportePdf(PeriodoReporte.MES_PASADO)
+        gestion.reportePdf(PeriodoReporte.SEMANA)
+        assertEquals(
+            listOf("reporte:2026-11-01:2026-11-26", "reporte:2026-10-01:2026-10-31", "reporte:2026-11-20:2026-11-26"),
+            llamadas,
+        )
+    }
+
+    @Test
+    fun `un reporte vacio se rechaza`() = runTest {
+        val enElAnio2000 = GestionServicio(gestionFalsa) { LocalDate.of(2000, 1, 1) }
+        try {
+            enElAnio2000.reportePdf(PeriodoReporte.HOY)
+            fail("Debió rechazar el PDF vacío")
+        } catch (vacio: ReglaInvalida) {
+            assertTrue(vacio.message!!.contains("vacío"))
+        }
+    }
 }

@@ -9,12 +9,18 @@ import com.smartbite.domain.modelo.Compra
 import com.smartbite.domain.modelo.Ficha
 import com.smartbite.domain.modelo.Fuente
 import com.smartbite.domain.modelo.Opcion
+import com.smartbite.domain.modelo.PeriodoReporte
 import com.smartbite.domain.modelo.Recurso
+import com.smartbite.domain.modelo.ReportePdf
 import com.smartbite.domain.modelo.Tablero
 import com.smartbite.domain.puerto.salida.GestionGateway
 import com.smartbite.domain.valor.Dinero
+import java.time.LocalDate
 
-class GestionServicio(private val gestion: GestionGateway) : GestionCasos {
+class GestionServicio(
+    private val gestion: GestionGateway,
+    private val hoy: () -> LocalDate = { LocalDate.now() },
+) : GestionCasos {
 
     override suspend fun listar(recurso: Recurso): List<Ficha> = gestion.listar(recurso)
 
@@ -81,5 +87,12 @@ class GestionServicio(private val gestion: GestionGateway) : GestionCasos {
     override suspend fun anularCompra(compra: Compra): Compra {
         if (!compra.pendiente) throw ReglaInvalida("Solo se anula una compra pendiente.")
         return gestion.anularCompra(compra.id)
+    }
+
+    override suspend fun reportePdf(periodo: PeriodoReporte): ReportePdf {
+        val (desde, hasta) = periodo.rango(hoy())
+        val reporte = gestion.reportePdf(desde, hasta)
+        if (reporte.bytes.isEmpty()) throw ReglaInvalida("El reporte llegó vacío. Intenta de nuevo.")
+        return reporte
     }
 }

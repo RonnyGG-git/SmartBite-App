@@ -7,10 +7,13 @@ import com.smartbite.domain.modelo.Compra
 import com.smartbite.domain.modelo.Ficha
 import com.smartbite.domain.modelo.Fuente
 import com.smartbite.domain.modelo.Opcion
+import com.smartbite.domain.modelo.PagoCliente
 import com.smartbite.domain.modelo.PedidoCreado
 import com.smartbite.domain.modelo.PedidoGuardado
 import com.smartbite.domain.modelo.Producto
+import com.smartbite.domain.modelo.PeriodoReporte
 import com.smartbite.domain.modelo.Recurso
+import com.smartbite.domain.modelo.ReportePdf
 import com.smartbite.domain.modelo.ReservaCliente
 import com.smartbite.domain.modelo.RestauranteRef
 import com.smartbite.domain.modelo.SucursalPublica
@@ -41,6 +44,7 @@ interface PublicoCasos {
     suspend fun pedirParaLlevar(sucursal: SucursalPublica, nombre: String, carrito: Carrito): PedidoCreado
     suspend fun recordarPedido(codigo: String)
     suspend fun misPedidos(): List<PedidoGuardado>
+    suspend fun pagarPedido(pedido: PedidoGuardado): PagoCliente
     suspend fun reservar(
         sucursalId: Int,
         fecha: String,
@@ -67,6 +71,7 @@ interface GestionCasos {
     suspend fun crearCompra(proveedorId: Int?, lineas: List<Triple<Int, String, String>>): Compra
     suspend fun recibirCompra(compra: Compra): Compra
     suspend fun anularCompra(compra: Compra): Compra
+    suspend fun reportePdf(periodo: PeriodoReporte): ReportePdf
 }
 
 interface CasosDeUso : OperacionCasos, CuentasCasos, PublicoCasos, GestionCasos

@@ -84,6 +84,7 @@ fun OrdenDto.aDominio(): Orden = traducir {
         faltantes = faltantes.orEmpty(),
         cuentaSolicitada = !cuentaSolicitadaEn.isNullOrBlank(),
         paraLlevar = tipoConsumo == "PARA_LLEVAR",
+        pagaraEfectivo = pagaraEfectivo == true,
     )
 }
 

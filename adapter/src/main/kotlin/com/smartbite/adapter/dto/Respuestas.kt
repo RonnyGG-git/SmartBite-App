@@ -52,6 +52,7 @@ data class OrdenDto(
     val faltantes: List<String>?,
     val tipoConsumo: String?,
     val cuentaSolicitadaEn: String?,
+    val pagaraEfectivo: Boolean? = null,
 )
 
 data class PedidoCreadoDto(val codigo: String?, val orden: OrdenDto?)

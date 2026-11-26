@@ -67,4 +67,13 @@ class CajaReglasTest {
     fun `una cuenta sin saldo esta saldada`() {
         assertTrue(cuenta.copy(saldoPendiente = Dinero.CERO).saldada)
     }
+
+    @Test
+    fun `el cliente paga cuando el restaurante confirmo y aun no esta pagado`() {
+        assertTrue(orden.pagablePorCliente)
+        assertTrue(orden.copy(estado = EstadoOrden.EN_PREPARACION).pagablePorCliente)
+        assertEquals(false, orden.copy(estado = EstadoOrden.POR_CONFIRMAR).pagablePorCliente)
+        assertEquals(false, orden.copy(estado = EstadoOrden.ENTREGADA).pagablePorCliente)
+        assertEquals(false, orden.copy(pagada = true).pagablePorCliente)
+    }
 }

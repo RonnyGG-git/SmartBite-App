@@ -2,9 +2,11 @@ package com.smartbite.application.servicio
 
 import com.smartbite.application.puerto.entrada.PublicoCasos
 import com.smartbite.domain.error.FalloRemoto
+import com.smartbite.domain.error.ReglaInvalida
 import com.smartbite.domain.modelo.Carrito
 import com.smartbite.domain.modelo.NuevaReserva
 import com.smartbite.domain.modelo.Opinion
+import com.smartbite.domain.modelo.PagoCliente
 import com.smartbite.domain.modelo.PedidoCreado
 import com.smartbite.domain.modelo.PedidoGuardado
 import com.smartbite.domain.modelo.Producto
@@ -40,6 +42,20 @@ class PublicoServicio(
         } catch (borrado: FalloRemoto.NoEncontrado) {
             null
         }
+    }
+
+    override suspend fun pagarPedido(pedido: PedidoGuardado): PagoCliente {
+        val orden = pedido.orden
+        if (!orden.pagablePorCliente) {
+            throw ReglaInvalida(
+                when {
+                    orden.pagada -> "Este pedido ya está pagado."
+                    orden.esperaConfirmacion -> "Podrás pagar cuando el restaurante confirme tu pedido."
+                    else -> "Este pedido ya está cerrado."
+                }
+            )
+        }
+        return publico.pagarPedido(pedido.codigo)
     }
 
     override suspend fun reservar(
